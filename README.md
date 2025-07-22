@@ -1,7 +1,6 @@
 # The Big Slice Restaurant Hub
 
-![The Big Slice Menu Screenshot]![The Big Slice Menu Screenshot](https://raw.githubusercontent.com/lgg6bentley/the-big-slice-restaurant-hub/main/the_big_slice_menu.png)
-
+![The Big Slice Menu Screenshot](https://raw.githubusercontent.com/lgg6bentley/the-big-slice-restaurant-hub/main/the_big_slice_menu.png)
 ## Project Overview
 
 The Big Slice Restaurant Hub is a web application designed to showcase a dynamic menu for a restaurant. This project serves as a practical demonstration of building a RESTful API with Django REST Framework and consuming it with a client-side rendered frontend using plain HTML, CSS (Tailwind CSS), and JavaScript. It provides a clean, responsive display of menu items fetched directly from a backend API.
