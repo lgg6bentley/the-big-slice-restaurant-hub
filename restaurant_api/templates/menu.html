@@ -1,0 +1,215 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Big Slice Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and a slightly darker theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* bg-gray-900 */
+            color: #e2e8f0; /* text-gray-100 */
+        }
+        .container {
+            max-width: 48rem; /* max-w-4xl */
+            margin-left: auto;
+            margin-right: auto;
+            padding: 1.5rem; /* p-6 */
+        }
+        .menu-item-card {
+            background-color: #2d3748; /* bg-gray-800 */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            padding: 1.5rem; /* p-6 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem; /* gap-6 */
+        }
+        @media (min-width: 768px) { /* md:flex-row */
+            .menu-item-card {
+                flex-direction: row;
+                align-items: flex-start; /* Align items to the top in row layout */
+            }
+        }
+        .menu-item-image {
+            width: 100%; /* w-full */
+            height: 12rem; /* h-48 */
+            object-fit: cover;
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+        @media (min-width: 768px) { /* md:w-48 */
+            .menu-item-image {
+                width: 12rem; /* md:w-48 */
+                flex-shrink: 0; /* Prevent shrinking */
+            }
+        }
+        .menu-item-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%; /* Ensure content takes full width on small screens */
+        }
+        @media (min-width: 768px) {
+            .menu-item-content {
+                width: auto; /* Allow content to size naturally on larger screens */
+            }
+        }
+        .menu-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+        .menu-item-name {
+            font-size: 1.75rem; /* text-3xl */
+            font-weight: 800; /* font-extrabold */
+            color: #fbbf24; /* text-orange-400 */
+            line-height: 1.2; /* Tighter line height */
+        }
+        .menu-item-price {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 700; /* font-bold */
+            color: #48bb78; /* text-green-400 */
+            margin-top: 0.5rem; /* mt-2 */
+        }
+        @media (min-width: 768px) { /* md:mt-0 md:ml-4 */
+            .menu-item-price {
+                margin-top: 0;
+                margin-left: 1rem;
+            }
+        }
+        .menu-item-category {
+            font-size: 0.875rem; /* text-sm */
+            color: #a0aec0; /* text-gray-400 */
+            margin-top: 0.25rem; /* mt-1 */
+        }
+        .menu-item-description {
+            color: #cbd5e0; /* text-gray-300 */
+            margin-top: 0.75rem; /* mt-3 */
+            line-height: 1.5;
+        }
+        .status-badge {
+            padding-left: 0.75rem; /* px-3 */
+            padding-right: 0.75rem; /* px-3 */
+            padding-top: 0.25rem; /* py-1 */
+            padding-bottom: 0.25rem; /* py-1 */
+            border-radius: 9999px; /* rounded-full */
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 600; /* font-semibold */
+            margin-top: 0.75rem; /* mt-3 */
+            align-self: flex-start; /* Align badge to start of flex item */
+        }
+        .status-available {
+            background-color: #38a169; /* bg-green-600 */
+            color: #fff; /* text-white */
+        }
+        .status-unavailable {
+            background-color: #e53e3e; /* bg-red-600 */
+            color: #fff; /* text-white */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center mb-10">
+            {# Corrected image source using Django's static tag #}
+            <img src="{% static 'images/thebigslice_logo.png' %}" alt="The Big Slice Logo" class="mx-auto h-32 mb-4 rounded-full shadow-lg">
+            <h1 class="text-5xl font-extrabold text-white tracking-tight">The Big Slice Menu</h1>
+        </div>
+        <div id="menu-items-container" class="space-y-8">
+            <p class="text-center text-gray-400 text-lg" id="loading-message">Loading delicious menu items...</p>
+        </div>
+        <p class="text-center text-red-500 mt-6 text-lg hidden" id="error-message">Failed to load menu. Please ensure the Django server is running and accessible.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuItemsContainer = document.getElementById('menu-items-container');
+            const loadingMessage = document.getElementById('loading-message');
+            const errorMessage = document.getElementById('error-message');
+
+            // Function to generate a consistent placeholder image based on item name
+            function generatePlaceholderImage(itemName) {
+                const seed = itemName.length % 5; // Simple way to vary images
+                const colors = [
+                    { bg: '222', text: 'FFF' }, // Dark grey, white text
+                    { bg: '333', text: 'DDD' }, // Slightly lighter grey
+                    { bg: '444', text: 'CCC' }, // Mid grey
+                    { bg: '555', text: 'BBB' }, // Light grey
+                    { bg: '666', text: 'AAA' }  // Lighter grey
+                ];
+                const chosenColor = colors[seed];
+                const width = 400;
+                const height = 300;
+                // Use a simple text for the placeholder
+                const placeholderText = encodeURIComponent(itemName.split(' ').slice(0, 2).join(' '));
+                return `https://placehold.co/${width}x${height}/${chosenColor.bg}/${chosenColor.text}?text=${placeholderText}`;
+            }
+
+            // Function to fetch and display menu items
+            async function fetchMenuItems() {
+                try {
+                    loadingMessage.classList.remove('hidden'); // Show loading message
+                    errorMessage.classList.add('hidden'); // Hide any previous error
+
+                    const response = await fetch('http://127.0.0.1:8000/api/menu/'); // Your Django API endpoint
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const apiResponse = await response.json(); // Get the full API response object
+                    const menuItems = apiResponse.results; // Access the 'results' array for the actual items
+                    
+                    loadingMessage.classList.add('hidden'); // Hide loading message
+
+                    if (menuItems.length === 0) { // Check length of the 'results' array
+                        menuItemsContainer.innerHTML = '<p class="text-center text-gray-400 text-lg">No menu items found. Add some delicious options via the Django admin!</p>';
+                        return;
+                    }
+
+                    menuItemsContainer.innerHTML = ''; // Clear loading message or previous content
+
+                    menuItems.forEach(item => { // Iterate over the 'results' array
+                        const itemCard = document.createElement('div');
+                        itemCard.className = `menu-item-card ${item.is_available ? '' : 'unavailable'}`;
+
+                        // Use the placeholder image for now, as actual image URLs would need to be stored in the DB
+                        const imageUrl = generatePlaceholderImage(item.name);
+                        const descriptionText = item.description || 'A delightful dish from The Big Slice, made with fresh ingredients.';
+
+                        itemCard.innerHTML = `
+                            <img src="${imageUrl}" alt="${item.name}" class="menu-item-image">
+                            <div class="menu-item-content">
+                                <div class="menu-item-header">
+                                    <h2 class="menu-item-name">${item.name}</h2>
+                                    <p class="menu-item-price">$${parseFloat(item.price).toFixed(2)}</p>
+                                </div>
+                                <p class="menu-item-category">${item.category}</p>
+                                <p class="menu-item-description">${descriptionText}</p>
+                                <span class="status-badge ${item.is_available ? 'status-available' : 'status-unavailable'}">
+                                    ${item.is_available ? 'Available' : 'Unavailable'}
+                                </span>
+                            </div>
+                        `;
+                        menuItemsContainer.appendChild(itemCard);
+                    });
+
+                } catch (error) {
+                    console.error('Error fetching menu items:', error);
+                    loadingMessage.classList.add('hidden'); // Hide loading message
+                    errorMessage.classList.remove('hidden'); // Show error message
+                    errorMessage.textContent = `Failed to load menu: ${error.message}. Please ensure the Django server is running and accessible.`;
+                }
+            }
+
+            fetchMenuItems(); // Call the function when the page loads
+        });
+    </script>
+</body>
+</html>
