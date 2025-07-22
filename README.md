@@ -1,7 +1,6 @@
 # The Big Slice Restaurant Hub
 
-![The Big Slice Menu Screenshot][the_big_slice_menu.png](https://github.com/lgg6bentley/the-big-slice-restaurant-hub/blob/main/the_big_slice_menu.png)
-*(Replace with an actual screenshot path once uploaded to your repo, or just use your latest clear screenshot like Screenshot 2025-07-21 231129.png by uploading it directly to the repo and getting its raw URL.)*
+![The Big Slice Menu Screenshot]![The Big Slice Menu Screenshot](https://raw.githubusercontent.com/lgg6bentley/the-big-slice-restaurant-hub/main/the_big_slice_menu.png)
 
 ## Project Overview
 
